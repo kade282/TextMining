@@ -82,4 +82,5 @@ cutExtensions <- function(document) {
 
 corpus <- tm_map(corpus, cutExtensions)
 
+#corpus[["Harry Potter i Czara Ognia"]][["content"]]
 
