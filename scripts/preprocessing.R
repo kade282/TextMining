@@ -1,7 +1,7 @@
 #³adowanie bibliotek
 library(tm)
-#library(hunspell)
-#library(stringr)
+library(hunspell)
+library(stringr)
 
 
 #zmiana katalogu roboczego
@@ -12,20 +12,19 @@ setwd(workDir)
 inputDir <- ".\\data"
 outputDir <- ".\\results"
 scriptsDir <- ".\\scripts"
-workspaceDir <- ".\\workspaces"
+workspaceDir <- ".\\workspaces" 
 
 #dir.create(outputDir, showWarnings = FALSE)
 
 #utworzenie katalogu wyjœciowego
-dir.create(outputDir, showWarnings = FALSE)
-dir.create(workspaceDir, showWarnings = FALSE)
+#dir.create(outputDir, showWarnings = FALSE)
+#dir.create(workspaceDir, showWarnings = FALSE)
 
 #utworzenie korpusu dokumentów
 corpusDir <- paste(
   inputDir,
-  "\\",
   "Literatura - streszczenia - orygina³",
-  sep = ""
+  sep = "\\"
 )
 corpus <- VCorpus(
   DirSource(
@@ -37,3 +36,31 @@ corpus <- VCorpus(
     language = "pl_PL"
   )
 )
+
+#usuniêcie z tekstów podzia³u na akapity
+pasteParagraphs <- content_transformer(function(text, char) paste(text, collapse = char))
+corpus <- tm_map(corpus, " ")
+
+#wstêpne przetwarzanie
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, content_transformer(tolower)) #tylko zawartoœæ dokumentów tekstowych
+
+stoplistFile <- paste(
+  inputDir,
+  "\\",
+  "stopwords_pl.txt",
+  sep = ""
+)
+stoplist <- readLines(
+  stoplistFile,
+  encoding = "UTF-8"
+)
+corpus <- tm_map(corpus, removeWords, stoplist)
+corpus <- tm_map(corpus, stripWhitespace)
+
+removeChar <- content_transformer(
+  function(x, pattern, replacement) 
+    gsub(pattern, replacement, x)
+)
+#writeLines(as.character(corpus[[1]]))
