@@ -23,9 +23,11 @@ workspaceDir <- ".\\workspaces"
 #utworzenie korpusu dokumentów
 corpusDir <- paste(
   inputDir,
+  "\\",
   "Literatura - streszczenia - orygina³",
-  sep = "\\"
+  sep = ""
 )
+
 corpus <- VCorpus(
   DirSource(
     corpusDir,
@@ -63,4 +65,21 @@ removeChar <- content_transformer(
   function(x, pattern, replacement) 
     gsub(pattern, replacement, x)
 )
+
 #writeLines(as.character(corpus[[1]]))
+
+
+#usuniêcie "em dash" i 3/4 z tekstów
+corpus <- tm_map(corpus, removeChar, intToUtf8(8722), "")
+corpus <- tm_map(corpus, removeChar, intToUtf8(190), "")
+
+
+#usuniêcie rozszerzeñ z nazw dokumentów
+cutExtensions <- function(document) {
+  meta(document, "id") <- gsub(pattern = "\\.txt$", "", meta(document, "id"))
+  return(document)
+}
+
+corpus <- tm_map(corpus, cutExtensions)
+
+
